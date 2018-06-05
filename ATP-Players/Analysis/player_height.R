@@ -63,5 +63,5 @@ top10height[,week_date:=as.Date(week_title,"%Y.%m.%d")]
 top10plot<-ggplot(top10height, aes(x = rank_number, y = height_inches, color = Name, frame = week_date))+geom_bar(stat = "identity")
 
 top10height1999<-top10height[week_year==1999]
-top10plot1999<-ggplot(top10height1999, aes(x = rank_number, y = height_inches, fill = Name, frame = week_date, cumulative = FALSE))+geom_bar(stat = "identity", position = "identity")+theme(legend.position="none")
+top10plot1999<-ggplot(top10height1999, aes(x = rank_number, y = height_inches, fill = Name, frame = week_date, cumulative = FALSE))+geom_bar(stat = "identity", position = "identity")+theme(legend.position="none")+geom_label(aes(label = Name))
 gganimate(top10plot1999, "tennisheight1999.gif",interval = 0.4, ani.width = 600, ani.height = 400)
