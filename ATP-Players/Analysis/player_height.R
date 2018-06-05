@@ -1,6 +1,7 @@
 library(ggplot2)
 library(data.table)
 library(plotly)
+library(gganimate)
 
 #Read in data
 playerData<-fread('../Data/5_players/player_overviews_UNINDEXED.csv',header = FALSE)
@@ -9,8 +10,8 @@ setnames(playerData,names(playerData), unlist(playerDataCol))
 
 rankingData<-fread('../Data/mergedrankings.csv',check.names = TRUE)
 #For some reason data.table not reading in the header row
-rankingCol<-c(fread('../Data/4_rankings/rankings_column_titles.txt',header = FALSE))
-setnames(rankingData,names(rankingData),unlist(rankingCol))
+#rankingCol<-c(fread('../Data/4_rankings/rankings_column_titles.txt',header = FALSE))
+#setnames(rankingData,names(rankingData),unlist(rankingCol))
 
 #Clean data
 playerData<-playerData[height_cm>0]
@@ -24,7 +25,7 @@ mergedPlayerRank<-merge(playerData,rankingData,all.x = FALSE, all.y = TRUE)
 
 #Sanity checks on the data using Roger Federer
 #federerSanityCheck<-mergedPlayerRank[last_name == 'Federer']
-#federerSanityCheck_rank<-rankingData[player_id == 'f324']
+federerSanityCheck_rank<-rankingData[player_id == 'f324']
 
 #Get max rank
 maxRank<-mergedPlayerRank[, .SD[which.min(rank_number)], by = player_id]
@@ -53,3 +54,11 @@ plotly::ggplotly(number1plot)
 
 rankByHeightPlot<-ggplot(data = rankByHeight,aes(x = height_inches, y = 1/highestRank))+geom_bar(stat = "identity")
 rankByHeightPlot
+
+#Height of Top 10's over time
+top10height<-mergedPlayerRank[rank_number<10]
+top10height[,Name:=paste(first_name,last_name,sep = " ")]
+top10height[,week_date:=as.Date(week_title,"%Y.%m.%d")]
+
+top10plot<-ggplot(top10height, aes(x = rank_number, y = height_inches, color = Name, frame = week_date))+geom_bar(stat = "identity")
+gganimate(top10plot, "tennisheight.gif",interval = 0.2, ani.width = 600, ani.height = 400)
