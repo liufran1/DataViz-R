@@ -1,5 +1,6 @@
 library(ggplot2)
 library(data.table)
+library(plotly)
 
 #Read in data
 playerData<-fread('../Data/5_players/player_overviews_UNINDEXED.csv',header = FALSE)
@@ -39,6 +40,16 @@ heightNumber1fields<-heightNumber1[,list(player_slug.x,
                                          height_inches)]
 heightNumber1fields[,Name:=paste(first_name,last_name,sep = " ")]
 heightNumber1fields<-heightNumber1fields[,list(Name,height_inches)]
+heightNumber1fields[,count:=1]
+#World number 1's are pretty evenly distributed around 6ft even
 #Collapse by height
 
-number1plot<-ggplot()+geom_bar(heightNumber1,aes(x = height_inches, y = player_slug))
+rankByHeight<-maxRank[,list(highestRank = min(rank_number)), by = height_inches]
+rankByHeight<-rankByHeight[height_inches>1]
+rankByHeight<-rankByHeight[order(height_inches)]
+
+number1plot<-ggplot(data = heightNumber1fields,aes(x = height_inches, y = count, fill = Name))+geom_bar(stat = "identity")+theme(legend.position="none")
+plotly::ggplotly(number1plot)
+
+rankByHeightPlot<-ggplot(data = rankByHeight,aes(x = height_inches, y = 1/highestRank))+geom_bar(stat = "identity")
+rankByHeightPlot
