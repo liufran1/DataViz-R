@@ -42,18 +42,25 @@ heightNumber1fields<-heightNumber1[,list(player_slug.x,
 heightNumber1fields[,Name:=paste(first_name,last_name,sep = " ")]
 heightNumber1fields<-heightNumber1fields[,list(Name,height_inches)]
 heightNumber1fields[,count:=1]
-#World number 1's are pretty evenly distributed around 6ft even
-#Collapse by height
-
-rankByHeight<-maxRank[,list(highestRank = min(rank_number)), by = height_inches]
-rankByHeight<-rankByHeight[height_inches>1]
-rankByHeight<-rankByHeight[order(height_inches)]
 
 number1plot<-ggplot(data = heightNumber1fields,aes(x = height_inches, y = count, fill = Name))+geom_bar(stat = "identity")+theme(legend.position="none")
 plotly::ggplotly(number1plot)
+#World number 1's are pretty evenly distributed around 6ft even
 
-rankByHeightPlot<-ggplot(data = rankByHeight,aes(x = height_inches, y = 1/highestRank))+geom_bar(stat = "identity")
-rankByHeightPlot
+#Collapse by height
+
+rankByHeight<-maxRank[, .SD[which(rank_number == min(rank_number))], by = height_inches]
+#Keep all ties
+
+rankByHeight<-rankByHeight[height_inches>1]
+rankByHeight<-rankByHeight[order(height_inches)]
+rankByHeight[,player_name:=paste(first_name, last_name, sep = " ")]
+
+rankByHeightCollapse<-rankByHeight[ , .(rank_number, number_players = .N,player_name = paste(player_name, collapse=",")), by = height_inches]
+rankByHeightCollapse<-unique(rankByHeightCollapse)
+
+rankByHeightPlot<-ggplot(data = rankByHeightCollapse,aes(x = height_inches, y = 1/rank_number,fill = number_players))+geom_bar(stat = "identity")
+plotly::ggplotly(rankByHeightPlot)
 
 #Height of Top 10's over time
 top10height<-mergedPlayerRank[rank_number<10]
