@@ -1,0 +1,109 @@
+---
+title: "Mens Tennis Height"
+output:
+  html_document:
+    code_folding: hide
+---
+
+Inspired by the 5'7" Diego Schwartzman's run to the 2018 French Open quarterfinals, I wanted to ask the question: who have been the shortest players who have been most successful? 
+
+The conventional wisdom in men's tennis is that there is a sweet spot in terms of height. Too short and you have difficulty with court coverage and generating power. Too tall and you're ungangly when moving around the court
+
+Credit for the hard work of getting the data goes to  <https://github.com/serve-and-volley/atp-world-tour-tennis-data>. Data is scraped from <http://www.atpworldtour.com/> dating back to 1973. 
+
+For the purposes of this analysis, I am using `data.table` in order to handle large-ish data sets (rather than `dplyr`) and `ggplot`. 
+
+```{r warning=F, message=F}
+library(ggplot2)
+library(data.table)
+library(plotly)
+library(gganimate)
+
+#Read in data
+playerData<-fread('../Data/5_players/player_overviews_UNINDEXED.csv',header = FALSE)
+playerDataCol<-c(fread('../Data/5_players/player_overviews_column_titles.txt',header = FALSE))
+setnames(playerData,names(playerData), unlist(playerDataCol))
+
+rankingData<-fread('../Data/mergedrankings.csv',check.names = TRUE)
+#For some reason data.table not reading in the header row
+#rankingCol<-c(fread('../Data/4_rankings/rankings_column_titles.txt',header = FALSE))
+#setnames(rankingData,names(rankingData),unlist(rankingCol))
+```
+
+We clean the data and join it for our purposes
+```{r warning=F, message=F}
+
+#Clean data
+playerData<-playerData[height_cm>0]
+
+#Join on player_id
+setkey(playerData,player_id)
+setkey(rankingData,player_id)
+
+#Only keep players that have been ranked and have data
+mergedPlayerRank<-merge(playerData,rankingData,all.x = FALSE, all.y = TRUE)
+```
+
+Doing a quick sanity check on the data, we look just at Roger Federer, whose career trajectory I'm familiar with.
+
+```{r warning=F, message=F}
+federerSanityCheck<-mergedPlayerRank[last_name == 'Federer']
+```
+
+Data transformations to get it in the shape we want.
+```{r warning=F, message=F}
+#Get max rank
+maxRank<-mergedPlayerRank[, .SD[which.min(rank_number)], by = player_id]
+
+#Sort by height then rank
+maxRank<-maxRank[order(rank_number,height_inches)]
+
+#Filter to look at distribution of world number 1's
+heightNumber1<-maxRank[rank_number == 1]
+heightNumber1fields<-heightNumber1[,list(player_slug.x,
+                                         first_name,
+                                         last_name,
+                                         height_inches)]
+heightNumber1fields[,Name:=paste(first_name,last_name,sep = " ")]
+heightNumber1fields<-heightNumber1fields[,list(Name,height_inches)]
+heightNumber1fields[,count:=1]
+
+
+rankByHeight<-maxRank[, .SD[which(rank_number == min(rank_number))], by = height_inches]
+#Keep all ties
+
+rankByHeight<-rankByHeight[height_inches>1]
+rankByHeight<-rankByHeight[order(height_inches)]
+rankByHeight[,player_name:=paste(first_name, last_name, sep = " ")]
+
+rankByHeightCollapse<-rankByHeight[ , .(rank_number, number_players = .N,player_name = paste(player_name, collapse=",")), by = height_inches]
+rankByHeightCollapse<-unique(rankByHeightCollapse)
+
+#Height of Top 10's over time
+top10height<-mergedPlayerRank[rank_number<10]
+top10height[,Name:=paste(first_name,last_name,sep = " ")]
+top10height[,week_date:=as.Date(week_title,"%Y.%m.%d")]
+```
+
+First, we look at the distribution of height among all current and former world number 1 players.
+```{r warning=F, message=F}
+number1plot<-ggplot(data = heightNumber1fields,aes(x = height_inches, y = count, fill = Name))+geom_bar(stat = "identity")+theme(legend.position="none")
+plotly::ggplotly(number1plot)
+```
+World number 1's are pretty evenly distributed around 6ft even, in line with the conventional wisdom. Both Roger Federer and Rafael Nadal are 6'1". Andy Murray is among the taller players to have achieved the number 1 ranking. Interestingly, the shortest world number 1, Marcelo Rios, was arguably one of the less successful, having never won a grand slam title and hanging on to the ranking for all of 4 weeks.
+
+Next we take a look at the distribution of heights of top 10 players over time
+```{r warning=F, message=F}
+top10plot<-ggplot(top10height, aes(x = rank_number, y = height_inches, color = Name, frame = week_date))+geom_bar(stat = "identity")
+
+top10height1999<-top10height[week_year==1999]
+top10plot1999<-ggplot(top10height1999, aes(x = rank_number, y = height_inches, fill = Name, frame = week_date, cumulative = FALSE))+geom_bar(stat = "identity", position = "identity")+theme(legend.position="none")+geom_label(aes(label = Name))
+gganimate(top10plot1999, "tennisheight1999.gif",interval = 0.4, ani.width = 600, ani.height = 400)
+```
+![Heights over Time](tennisheight1999.gif)
+
+Finally we take a view over the open era.
+```{r warning=F, message=F}
+rankByHeightPlot<-ggplot(data = rankByHeightCollapse,aes(x = height_inches, y = 1/rank_number,fill = number_players))+geom_bar(stat = "identity")
+plotly::ggplotly(rankByHeightPlot)
+```
