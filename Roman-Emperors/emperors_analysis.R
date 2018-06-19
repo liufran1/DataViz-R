@@ -1,6 +1,7 @@
 library(ggplot2)
 library(data.table)
 library(plotly)
+library(forcats)
 
 #Read in data
 romanEmperors<-fread('emperors.csv')
@@ -11,12 +12,13 @@ romanEmperors[,death:=as.Date(death)]
 romanEmperors[,reign.start:=as.Date(reign.start)]
 romanEmperors[,reign.end:=as.Date(reign.end)]
 
-  #Change dates to BCE
-romanEmperors[index<5, year(romanEmperors$birth) := -year(romanEmperors$birth)]
-
+#Change dates to BCE
+#TODO: set birth year to BCE
+#romanEmperors[index<5, year(romanEmperors$birth) := -year(romanEmperors$birth)]
 
 #Set factor levels
 romanEmperors$name<-factor(romanEmperors$name, levels = romanEmperors$name)
+#TODO: reverse factors
 
 #Plot
 reignsPlot<-ggplot() +
@@ -28,4 +30,7 @@ reignsPlot<-ggplot() +
 
 plotly::ggplotly(reignsPlot)
 
+#TODO: plots of birthplaces and cause of death/ascension 
+
+#TODO: set up plotly api
 #api_create(p, filename = "roman-emperors")
