@@ -36,14 +36,18 @@ beginningYear<-beginningYear - year(beginningYear)*365*2
 #Plot
 #TODO: Manually adjust size
 reignsPlotBack<-ggplot() +
-  geom_segment(data = romanEmperors, aes(x = beginningYear, xend = birth, y = name, yend = name, color = rise), size = 2)+
-  geom_segment(data = romanEmperors, aes(x = death, xend = as.Date('0450-01-01'), y = name, yend = name, color = Power_Transfer), size = 2)+
-  geom_segment(data = romanEmperors, aes(x = birth, xend = death, y = name, yend = name), size = 2)+
-  geom_segment(data = romanEmperors, aes(x = birth+500, xend = death-500, y = name, yend = name), size = 1.5, color = 'white')+ #hack to get around geom_segment not accepting fill param
-  geom_segment(data = romanEmperors, aes(x = reign.start, xend = reign.end, y = name, yend = name, color= dynasty), size = 2)+
+  geom_segment(data = romanEmperors, aes(x = beginningYear, xend = birth, y = name, yend = name, color = rise), size = 4) +
+  geom_segment(data = romanEmperors, aes(x = death, xend = as.Date('0450-01-01'), y = name, yend = name, color = Power_Transfer), size = 4) +
+  geom_segment(data = romanEmperors, aes(x = birth, xend = death, y = name, yend = name), size = 4)+
+  geom_segment(data = romanEmperors, aes(x = birth+500, xend = death-500, y = name, yend = name), size = 3.5, color = 'white')+ #hack to get around geom_segment not accepting fill param
+  geom_segment(data = romanEmperors, aes(x = reign.start, xend = reign.end, y = name, yend = name), size = 4, color= 'black')+
   xlab('Year') + 
   ylab('Emperor') +
-  theme_classic()
+  #scale_color_manual(name = 'rise', values = rise, labels = rise)+
+  #scale_color_manual(name = 'end', values = Power_Transfer, labels = Power_Transfer)+
+  theme_classic() +
+  theme(legend.position = "none")
+reignsPlotBack
 
 reignsPlotSide<-ggplot() +
   geom_segment(data = romanEmperors, aes(x = as.Date('0400-01-01'), xend = as.Date('0450-01-01'), y = name, yend = name, color = rise), size = 2)+
