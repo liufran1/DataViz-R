@@ -1,0 +1,1 @@
+Submission for `r/dataisbeautiful`'s July 2018 [DataViz Battle](https://www.reddit.com/r/dataisbeautiful/comments/8vhxhq/battle_dataviz_battle_for_the_month_of_july_2018/), a visualization of the feeding habits of 15 bird species.

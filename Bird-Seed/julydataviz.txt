@@ -1,0 +1,16 @@
+bird,preferred feeder,black oil sunflower,striped sunflower,hulled sunflower,millet white/red,milo seed,nyjer seed,shelled peanuts,safflower seed,corn products
+cardinals,abde,high,high,high,low,none,none,none,high,low
+chickadees,acdf,high,medium,medium,none,none,none,medium,medium,none
+doves,de,medium,low,medium,high,high,low,none,medium,medium
+goldfinches,ac,high,medium,high,low,none,high,none,none,none
+grosbreaks,ad,medium,medium,high,none,none,none,none,low,none
+house finches,ac,high,medium,high,medium,none,high,none,low,none
+jays,ade,high,high,high,none,low,none,medium,low,medium
+juncos,ade,low,low,low,low,none,low,none,none,high
+nuthatches,abf,high,medium,medium,none,none,none,low,low,none
+purple finches,ac,high,medium,high,low,none,high,none,none,none
+siskins,bc,low,low,high,none,none,high,none,none,low
+sparrows,abd,high,high,high,high,medium,none,none,low,medium
+titmice,abdf,high,medium,medium,none,none,low,medium,low,none
+towhees,ade,high,high,high,low,none,none,low,low,low
+woodpeckers,adf,medium,medium,high,none,none,none,low,low,low
