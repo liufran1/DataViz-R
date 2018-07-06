@@ -1,8 +1,8 @@
 library(data.table)
 library(ggplot2)
 library(dplyr)
+library(fastICA)
 
-#set.seed(2014)
 
 birdseed<-fread("julydataviz.txt")
 
@@ -37,7 +37,22 @@ ggplot(birdpcaDF, aes(x = FirstFactor, y = SecondFactor, color = birdpcaDF$clust
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 
-birdKmeans<-kmeans(birdseedNumeric, 4, nstart = 20)
 
-birdpcaDF$cluster2 <- as.factor(birdKmeans$cluster)
-ggplot(birdpcaDF, aes(x = FirstFactor, y = SecondFactor, color = birdpcaDF$cluster2)) + geom_point()
+#Inspired by this post (https://www.reddit.com/r/dataisbeautiful/comments/8vr4rv/grouping_birds_by_their_feeding_preferences_using/)
+#to try Independent Component Analysis as an alternative to PCA
+birdICA<-fastICA(birdseedNumeric, n.comp = 2)
+birdicaDF<-do.call(rbind, Map(data.frame, FirstFactor=birdICA$S[,1], SecondFactor=birdICA$S[,2]))
+
+birdClusterICA <- kmeans(birdicaDF, 3, nstart = 20)
+
+birdicaDF$cluster <- as.factor(birdClusterICA$cluster)
+birdicaDF$bird <- birdseed$bird
+ggplot(birdicaDF, aes(x = FirstFactor, y = SecondFactor, color = birdicaDF$cluster)) + 
+  geom_text(aes(label = bird)) +
+  theme(legend.position = "none", 
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
